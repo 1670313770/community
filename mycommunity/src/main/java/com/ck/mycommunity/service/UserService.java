@@ -30,7 +30,7 @@ public class UserService {
     public User findByToken(String token){
         User user=new User();
         user.setToken(token);
-        return userDao.selectOne(user);
+         return userDao.selectOne(user);
     }
 
 }

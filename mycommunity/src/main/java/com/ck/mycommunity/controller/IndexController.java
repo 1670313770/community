@@ -4,13 +4,11 @@ import com.ck.mycommunity.domain.User;
 import com.ck.mycommunity.pojo.QuestionUserPojo;
 import com.ck.mycommunity.service.QuestionService;
 import com.ck.mycommunity.service.UserService;
+import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.Mapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.Cookie;
@@ -32,7 +30,11 @@ public class IndexController {
     private QuestionService questionService;
 
     @RequestMapping("/")
-    public String index(HttpServletRequest request, Model model){
+    public String index(
+            HttpServletRequest request, Model model,
+            @RequestParam(name = "pagNum",defaultValue = "1")String pagNum,
+            @RequestParam(name = "countQuestion",defaultValue = "10")String countQuestion
+    ){
         Cookie[] cookies = request.getCookies();
         if (cookies!=null&&cookies.length!=0)
         for (Cookie cookie : cookies) {
@@ -44,8 +46,10 @@ public class IndexController {
                break;
            }
         }
-        List<QuestionUserPojo> allQuestionUserPojo = questionService.findAllQuestionUserPojo();
+        PageInfo pageInfo = questionService.findAllWithPage(Integer.parseInt(pagNum), Integer.parseInt(countQuestion));
+        List<QuestionUserPojo> allQuestionUserPojo = pageInfo.getList();
         model.addAttribute("questions",allQuestionUserPojo);
+        model.addAttribute("pageInf",pageInfo);
         return "index";
     }
 }

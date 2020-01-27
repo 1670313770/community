@@ -8,3 +8,8 @@ spring:
      password:
      url: "jdbc:mysql:///community"
      driver-class-name: "com.mysql.jdbc.Driver"
+pagehelper:
+  helperDialect: mysql
+  reasonable: true
+  supportMethodsArguments: true
+  params: count=countSql

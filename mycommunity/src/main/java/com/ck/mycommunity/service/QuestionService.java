@@ -5,6 +5,9 @@ import com.ck.mycommunity.dao.UserDao;
 import com.ck.mycommunity.domain.Question;
 import com.ck.mycommunity.domain.User;
 import com.ck.mycommunity.pojo.QuestionUserPojo;
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -48,5 +51,14 @@ public class QuestionService {
             qus.add(questionUserPojo);
         }
         return qus;
+    }
+
+    public PageInfo findAllWithPage(int nowPage,int countQuestion){
+//        分页
+        Page<QuestionUserPojo> p = PageHelper.startPage(nowPage,countQuestion);
+        List<QuestionUserPojo> qus = findAllQuestionUserPojo();
+        PageInfo<QuestionUserPojo> questionUserPojoPageInfo = new PageInfo<>(p.getResult());
+        questionUserPojoPageInfo.setList(qus);
+        return questionUserPojoPageInfo;
     }
 }
