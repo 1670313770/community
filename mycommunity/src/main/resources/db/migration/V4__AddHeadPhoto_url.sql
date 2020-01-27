@@ -1,0 +1,1 @@
+ALTER TABLE gituser ADD avatar_url VARCHAR(100) NULL;

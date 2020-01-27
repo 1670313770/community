@@ -1,0 +1,10 @@
+git:
+  id: "d8bc7125c8bf96353054"
+  secret: "9d555f7e1f42b1d4792bd2151af6be9184840d1c"
+  redirect: "http://localhost:8080/callback"
+spring:
+  datasource:
+     username: "root"
+     password:
+     url: "jdbc:mysql:///community"
+     driver-class-name: "com.mysql.jdbc.Driver"

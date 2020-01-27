@@ -1,0 +1,1 @@
+ALTER TABLE gituser ADD bio VARCHAR(256) NULL;
