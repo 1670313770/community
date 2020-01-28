@@ -11,6 +11,7 @@ import com.github.pagehelper.PageInfo;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import tk.mybatis.mapper.entity.Example;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,6 +37,47 @@ public class QuestionService {
 
     public List<QuestionUserPojo> findAllQuestionUserPojo(){
         List<Question> qs = findAll();
+        List<QuestionUserPojo> qus = quToQuU(qs);
+        return qus;
+    }
+
+    public PageInfo findAllWithPage(int nowPage,int countQuestion){
+//        分页
+        Page<QuestionUserPojo> p = PageHelper.startPage(nowPage,countQuestion);
+        List<QuestionUserPojo> qus = findAllQuestionUserPojo();
+        PageInfo<QuestionUserPojo> questionUserPojoPageInfo = new PageInfo<>(p.getResult());
+        questionUserPojoPageInfo.setList(qus);
+        return questionUserPojoPageInfo;
+    }
+
+    //根据用户分页查询
+    public List<QuestionUserPojo> findAllQuestionUserPojoByAid(String uid){
+        Example example=new Example(Question.class);
+        example.createCriteria().andEqualTo("creator",uid);
+        List<Question> qs = questionDao.selectByExample(example);
+        List<QuestionUserPojo> qus = quToQuU(qs);
+        return qus;
+    }
+    //根据用户分页
+    public PageInfo findAllQuestionUserPojoByAidWithPage(int nowPage,int countQuestion,String aid){
+//        分页
+        Page<QuestionUserPojo> p = PageHelper.startPage(nowPage,countQuestion);
+        List<QuestionUserPojo> qus = findAllQuestionUserPojoByAid(aid);
+        PageInfo<QuestionUserPojo> questionUserPojoPageInfo = new PageInfo<>(p.getResult());
+        questionUserPojoPageInfo.setList(qus);
+        return questionUserPojoPageInfo;
+    }
+
+    public QuestionUserPojo findQuestionUserById(Integer id){
+        Example example = new Example(Question.class);
+        example.createCriteria().andEqualTo("id",id);
+        List<Question> questions = questionDao.selectByExample(example);
+        List<QuestionUserPojo> questionUserPojos = quToQuU(questions);
+        return questionUserPojos.get(0);
+    }
+
+
+    private List<QuestionUserPojo> quToQuU(List<Question> qs){
         List<QuestionUserPojo> qus=new ArrayList<>();
         for (Question q : qs) {
             QuestionUserPojo questionUserPojo=new QuestionUserPojo();
@@ -51,14 +93,5 @@ public class QuestionService {
             qus.add(questionUserPojo);
         }
         return qus;
-    }
-
-    public PageInfo findAllWithPage(int nowPage,int countQuestion){
-//        分页
-        Page<QuestionUserPojo> p = PageHelper.startPage(nowPage,countQuestion);
-        List<QuestionUserPojo> qus = findAllQuestionUserPojo();
-        PageInfo<QuestionUserPojo> questionUserPojoPageInfo = new PageInfo<>(p.getResult());
-        questionUserPojoPageInfo.setList(qus);
-        return questionUserPojoPageInfo;
     }
 }

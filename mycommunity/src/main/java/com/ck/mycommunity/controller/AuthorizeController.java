@@ -50,17 +50,26 @@ public class AuthorizeController {
         String accessToken = githubProvider.getAccessToken(accessTokenPojo);
         GithubUser githubUser = githubProvider.githubUser(accessToken);
         if(githubUser!=null){//登录成功
-//            添加进数据库
-            User user=new User();
-            user.setToken(UUID.randomUUID().toString());
-            user.setName(githubUser.getName());
-            user.setAccountId(String.valueOf(githubUser.getId()));
-            user.setGmtCreate(System.currentTimeMillis());
-            user.setGmtModified(user.getGmtCreate());
-            user.setAvatarUrl(githubUser.getAvatar_url());
-            userService.insertUser(user);
+//          添加进数据库
+//            查看数据库是否有该账号
+            User hasUser = userService.findUserByAccountID(String.valueOf(githubUser.getId()));
+            if(hasUser==null){
+                hasUser=new User();
+                hasUser.setToken(UUID.randomUUID().toString());
+                hasUser.setName(githubUser.getName());
+                hasUser.setAccountId(String.valueOf(githubUser.getId()));
+                hasUser.setGmtCreate(System.currentTimeMillis());
+                hasUser.setGmtModified(hasUser.getGmtCreate());
+                hasUser.setAvatarUrl(githubUser.getAvatar_url());
+                userService.insertUser(hasUser);
+            }else {
+                hasUser.setToken(UUID.randomUUID().toString());
+                hasUser.setGmtModified(System.currentTimeMillis());
+                userService.updateUser(hasUser);
+            }
 //            写入Cookie
-            response.addCookie(new Cookie("token",user.getToken()));
+            response.addCookie(new Cookie("token",hasUser.getToken()));
+            request.getSession().setAttribute("user",hasUser);
             return "redirect:/";
         }else {//登录失败
             return "redirect:/";

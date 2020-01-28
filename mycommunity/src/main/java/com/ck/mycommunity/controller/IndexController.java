@@ -35,21 +35,26 @@ public class IndexController {
             @RequestParam(name = "pagNum",defaultValue = "1")String pagNum,
             @RequestParam(name = "countQuestion",defaultValue = "10")String countQuestion
     ){
-        Cookie[] cookies = request.getCookies();
-        if (cookies!=null&&cookies.length!=0)
-        for (Cookie cookie : cookies) {
-           if("token".equalsIgnoreCase(cookie.getName())){
-               User user = userService.findByToken(cookie.getValue());
-               if(user!=null){
-                   request.getSession().setAttribute("user",user);
-               }
-               break;
-           }
-        }
         PageInfo pageInfo = questionService.findAllWithPage(Integer.parseInt(pagNum), Integer.parseInt(countQuestion));
         List<QuestionUserPojo> allQuestionUserPojo = pageInfo.getList();
         model.addAttribute("questions",allQuestionUserPojo);
         model.addAttribute("pageInf",pageInfo);
         return "index";
+    }
+
+    @RequestMapping("/destoryUser")
+    public String destoryUser( HttpServletRequest request, Model model,HttpServletResponse response){
+        Cookie[] cookies = request.getCookies();
+        for (Cookie cookie : cookies) {
+            if("token".equalsIgnoreCase(cookie.getName())){
+                cookie.setMaxAge(0);
+                cookie.setValue("");
+                response.addCookie(cookie);
+                break;
+            }
+        }
+        if(request.getSession().getAttribute("user")!=null)
+            request.getSession().removeAttribute("user");
+        return "redirect:/";
     }
 }

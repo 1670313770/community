@@ -22,15 +22,28 @@ public class UserService {
         List<User> users = userDao.selectAll();
         return users;
     }
+    public User findUserByAccountID(String aid){
+        Example example=new Example(User.class);
+        example.createCriteria().andEqualTo("accountId",aid);
+        User user1 = userDao.selectOneByExample(example);
+        return user1;
+    }
 
     public Integer insertUser(User user){
         return userDao.insert(user);
     }
 
+    public void updateUser(User user){
+        Example example=new Example(User.class);
+        example.createCriteria().andEqualTo("id",user.getId()).andEqualTo("accountId",user.getAccountId());
+        userDao.updateByExample(user,example);
+    }
+
     public User findByToken(String token){
         User user=new User();
         user.setToken(token);
-         return userDao.selectOne(user);
+        return userDao.selectOne(user);
     }
+
 
 }

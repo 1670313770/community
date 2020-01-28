@@ -34,18 +34,10 @@ public class PublishController {
 
     @PostMapping("/publish")
     public String publishform(Question question, HttpServletRequest request, Model model){
-        User user=null;
-        Cookie[] cookies = request.getCookies();
-        for (Cookie cookie : cookies) {
-            if("token".equalsIgnoreCase(cookie.getName())){
-                user = userService.findByToken(cookie.getValue());
-                if(user!=null){
-                    request.getSession().setAttribute("user",user);
-                }
-                break;
-            }
-        }
-
+        //获取用户信息
+        User user= (User) request.getSession().getAttribute("user");
+        if(user==null)
+            return "redirect:/";
         if(question.getTitle()==null||"".equalsIgnoreCase(question.getTitle())){
             model.addAttribute("error","标题不能为空");
         }else{
