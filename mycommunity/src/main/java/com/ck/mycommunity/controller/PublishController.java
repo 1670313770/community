@@ -7,10 +7,7 @@ import com.ck.mycommunity.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -26,6 +23,15 @@ public class PublishController {
     private UserService userService;
     @Autowired
     private QuestionService questionService;
+
+    @GetMapping("/publish/{id}")
+    public String publish(@PathVariable(name = "id")Long id,Model model) {
+        Question question = questionService.findQuestionById(id);
+        model.addAttribute("title",question.getTitle());
+        model.addAttribute("description",question.getDescription());
+        model.addAttribute("tag",question.getTag());
+        return "publish";
+    }
 
     @GetMapping("/publish")
     public String publish(){
@@ -60,11 +66,19 @@ public class PublishController {
             model.addAttribute("error","用户未登录");
             return "publish";
         }else if(user.getId()!=null){
-            question.setCreator(user.getId());
-            question.setGmtCreate(System.currentTimeMillis());
-            question.setGmtModified(question.getGmtCreate());
-            questionService.insertQuestion(question);
-            System.out.println(question);
+            if(question.getId()!=null){
+                Question questionById = questionService.findQuestionById(Long.valueOf(question.getId().toString()));
+                questionById.setTitle(question.getTitle());
+                questionById.setDescription(question.getDescription());
+                questionById.setTag(question.getTag());
+                questionService.updateQuestionById(questionById);
+            }else {
+                question.setCreator(user.getId());
+                question.setGmtCreate(System.currentTimeMillis());
+                question.setGmtModified(question.getGmtCreate());
+                questionService.insertQuestion(question);
+            }
+
         }
 
         return "redirect:/";

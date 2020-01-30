@@ -1,0 +1,1 @@
+ALTER TABLE comment ADD content VARCHAR(1024) NULL;

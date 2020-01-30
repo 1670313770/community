@@ -6,6 +6,7 @@ import com.ck.mycommunity.pojo.GitConfigMessagePojo;
 import com.ck.mycommunity.pojo.GithubUser;
 import com.ck.mycommunity.provider.GithubProvider;
 import com.ck.mycommunity.service.UserService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.http.HttpRequest;
@@ -24,13 +25,13 @@ import java.util.UUID;
  * @create 2020-01-23-16:07
  */
 @Controller
+@Slf4j
 public class AuthorizeController {
 
     @Autowired
     private GithubProvider githubProvider;
     @Autowired
     private GitConfigMessagePojo gitConfigMessagePojo;
-
     @Autowired
     private UserService userService;
 
@@ -68,10 +69,13 @@ public class AuthorizeController {
                 userService.updateUser(hasUser);
             }
 //            写入Cookie
-            response.addCookie(new Cookie("token",hasUser.getToken()));
+            Cookie cookie = new Cookie("token", hasUser.getToken());
+            cookie.setMaxAge(60 * 60 * 24 * 30 * 6);
+            response.addCookie(cookie);
             request.getSession().setAttribute("user",hasUser);
             return "redirect:/";
         }else {//登录失败
+            log.error("callback get github error,{}", githubUser);
             return "redirect:/";
         }
 
