@@ -5,6 +5,7 @@ import com.ck.mycommunity.pojo.QuestionUserPojo;
 import com.ck.mycommunity.service.QuestionService;
 import com.ck.mycommunity.service.UserService;
 import com.github.pagehelper.PageInfo;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -22,6 +23,7 @@ import java.util.List;
  * @create 2020-01-22-21:28
  */
 @Controller
+@Slf4j
 public class IndexController {
 
     @Autowired
@@ -33,12 +35,14 @@ public class IndexController {
     public String index(
             HttpServletRequest request, Model model,
             @RequestParam(name = "pagNum",defaultValue = "1")String pagNum,
-            @RequestParam(name = "countQuestion",defaultValue = "10")String countQuestion
+            @RequestParam(name = "countQuestion",defaultValue = "10")String countQuestion,
+            @RequestParam(name = "search",required = false)String search
     ){
-        PageInfo pageInfo = questionService.findAllWithPage(Integer.parseInt(pagNum), Integer.parseInt(countQuestion));
+        PageInfo pageInfo = questionService.findAllWithPage(search,Integer.parseInt(pagNum), Integer.parseInt(countQuestion));
         List<QuestionUserPojo> allQuestionUserPojo = pageInfo.getList();
         model.addAttribute("questions",allQuestionUserPojo);
         model.addAttribute("pageInf",pageInfo);
+        model.addAttribute("search",search);
         return "index";
     }
 

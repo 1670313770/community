@@ -1,6 +1,7 @@
 package com.ck.mycommunity.interceptor;
 
 import com.ck.mycommunity.domain.User;
+import com.ck.mycommunity.service.NoticeService;
 import com.ck.mycommunity.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -18,6 +19,8 @@ import javax.servlet.http.HttpServletResponse;
 public class SessionInterceptor implements HandlerInterceptor {
     @Autowired
     private UserService userService;
+    @Autowired
+    private NoticeService noticeService;
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
@@ -28,7 +31,9 @@ public class SessionInterceptor implements HandlerInterceptor {
                 if("token".equalsIgnoreCase(cookie.getName())){
                     User user = userService.findByToken(cookie.getValue());
                     if(user!=null){
+                        Integer unreadCount = noticeService.findNoReadNoticeCount(user.getId());
                         request.getSession().setAttribute("user",user);
+                        request.getSession().setAttribute("unreadCount",unreadCount);
                     }
                     break;
                 }

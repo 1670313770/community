@@ -2,8 +2,11 @@ package com.ck.mycommunity.controller;
 
 import com.ck.mycommunity.domain.Question;
 import com.ck.mycommunity.domain.User;
+import com.ck.mycommunity.exception.CustomizeErrorCode;
+import com.ck.mycommunity.exception.CustomizeException;
 import com.ck.mycommunity.service.QuestionService;
 import com.ck.mycommunity.service.UserService;
+import com.ck.mycommunity.tag.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -27,23 +30,29 @@ public class PublishController {
     @GetMapping("/publish/{id}")
     public String publish(@PathVariable(name = "id")Long id,Model model) {
         Question question = questionService.findQuestionById(id);
+        if(question==null)
+            throw new CustomizeException(CustomizeErrorCode.QUESTION_NOT_FOUND);
         model.addAttribute("title",question.getTitle());
         model.addAttribute("description",question.getDescription());
         model.addAttribute("tag",question.getTag());
+        model.addAttribute("id",question.getId());
+        model.addAttribute("tags", Tag.get());
         return "publish";
     }
 
     @GetMapping("/publish")
-    public String publish(){
+    public String publish(Model model){
+        model.addAttribute("tags", Tag.get());
         return "publish";
     }
 
     @PostMapping("/publish")
     public String publishform(Question question, HttpServletRequest request, Model model){
+        model.addAttribute("tags", Tag.get());
+
         //获取用户信息
         User user= (User) request.getSession().getAttribute("user");
-        if(user==null)
-            return "redirect:/";
+
         if(question.getTitle()==null||"".equalsIgnoreCase(question.getTitle())){
             model.addAttribute("error","标题不能为空");
         }else{
@@ -58,6 +67,9 @@ public class PublishController {
             model.addAttribute("error","标签不能为空");
         }else {
             model.addAttribute("tag",question.getTag());
+        }
+        if(user==null) {
+            model.addAttribute("error", "请登陆后再试");
         }
         if(model.containsAttribute("error"))
             return "publish";

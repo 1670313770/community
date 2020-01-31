@@ -28,7 +28,8 @@ function comment2target(targetId, type, content) {
         }),
         success: function (response) {
             if (response.code == 200) {
-                window.location.reload();
+                window.location.replace(location.href);
+                // window.location.reload();
             } else {
                 if (response.code == 2003) {
                     var isAccepted = confirm(response.message);

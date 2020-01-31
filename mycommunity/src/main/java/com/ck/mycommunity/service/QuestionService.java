@@ -37,15 +37,26 @@ public class QuestionService {
     private CommentDao commentDao;
 
     public void insertQuestion(Question question){
+        if(question.getViewCount()==null)
+            question.setViewCount(0);
+        if(question.getCommentCount()==null)
+            question.setCommentCount(0);
+        if(question.getLikeCount()==null)
+            question.setLikeCount(0);
         questionDao.insert(question);
     }
 
-    public List<Question> findAll(){
-        return questionDao.selectAll();
+    public List<Question> findAll(String search){
+        Example example=new Example(Question.class);
+        example.setOrderByClause("gmt_create desc");
+        if(search!=null&&!"".equalsIgnoreCase(search))
+            example.createCriteria().andLike("title","%"+search+"%");
+        List<Question> questions = questionDao.selectByExample(example);
+        return questions;
     }
 
-    public List<QuestionUserPojo> findAllQuestionUserPojo(){
-        List<Question> qs = findAll();
+    public List<QuestionUserPojo> findAllQuestionUserPojo(String search){
+        List<Question> qs = findAll(search);
         if(qs == null)
             throw new CustomizeException(CustomizeErrorCode.QUESTION_NOT_FOUND);
         List<QuestionUserPojo> qus = quToQuU(qs);
@@ -59,10 +70,10 @@ public class QuestionService {
         return question;
     }
 
-    public PageInfo findAllWithPage(int nowPage,int countQuestion){
+    public PageInfo findAllWithPage(String search,int nowPage,int countQuestion){
 //        分页
         Page<QuestionUserPojo> p = PageHelper.startPage(nowPage,countQuestion);
-        List<QuestionUserPojo> qus = findAllQuestionUserPojo();
+        List<QuestionUserPojo> qus = findAllQuestionUserPojo(search);
         PageInfo<QuestionUserPojo> questionUserPojoPageInfo = new PageInfo<>(p.getResult());
         questionUserPojoPageInfo.setList(qus);
         return questionUserPojoPageInfo;
@@ -125,17 +136,18 @@ public class QuestionService {
     @Transactional
     public void addView(Long id) {
         Question questionById = findQuestionById(id);
+        if(questionById!=null)
         questionById.setViewCount(questionById.getViewCount()+1);
         questionDao.updateByPrimaryKey(questionById);
     }
 
-    //返回一级回复
+    //返回一级、二级回复
     public List<CommentPojo> findCommentPojoById(Long qid, CommentTypeEnum typeEnum){
         //获取当前问题的所有回复
         Example example=new Example(Comment.class);
         example.createCriteria()
                 .andEqualTo("parentId",qid)
-                .andEqualTo("type",CommentTypeEnum.QUESTION.getType());
+                .andEqualTo("type",typeEnum.getType());
         example.setOrderByClause("gmt_create desc");
         List<Comment> comments = commentDao.selectByExample(example);
         if(comments==null||comments.size()==0)
@@ -161,7 +173,28 @@ public class QuestionService {
         }).collect(Collectors.toList());
 
         return collect;
+    }
 
+    public List<QuestionUserPojo> findRelated(QuestionUserPojo pojo){
+        if(pojo.getTag()==null||"".equalsIgnoreCase(pojo.getTag()))
+            return new ArrayList<>();
 
+        String[] split = pojo.getTag().split(",");
+
+        Example example=new Example(Question.class);
+        Example.Criteria criteria = example.createCriteria();
+        for (String s : split) {
+            criteria.orLike("tag","%"+s+"%");
+        }
+//        example.createCriteria().andNotEqualTo("id",pojo.getId());
+        List<Question> questions = questionDao.selectByExample(example);
+        for (Question question : questions) {
+            if(question.getId()==pojo.getId()){
+                questions.remove(question);
+                break;
+            }
+        }
+        List<QuestionUserPojo> qus = quToQuU(questions);
+        return qus;
     }
 }

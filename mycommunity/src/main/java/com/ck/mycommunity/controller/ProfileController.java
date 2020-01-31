@@ -1,7 +1,9 @@
 package com.ck.mycommunity.controller;
 
+import com.ck.mycommunity.domain.Notice;
 import com.ck.mycommunity.domain.User;
 import com.ck.mycommunity.pojo.QuestionUserPojo;
+import com.ck.mycommunity.service.NoticeService;
 import com.ck.mycommunity.service.QuestionService;
 import com.ck.mycommunity.service.UserService;
 import com.github.pagehelper.PageInfo;
@@ -27,6 +29,8 @@ public class ProfileController {
     private QuestionService questionService;
     @Autowired
     private UserService userService;
+    @Autowired
+    private NoticeService noticeService;
 
     @GetMapping("/profile/{action}")
     public String profile(@PathVariable(name = "action")String action, Model model,
@@ -55,6 +59,14 @@ public class ProfileController {
         }else if("replies".equalsIgnoreCase(action)){
             model.addAttribute("section","replies");
             model.addAttribute("sectionName","最新回复");
+            if(user==null) {
+                return "redirect:/";
+            }else{
+                PageInfo pageInfo = noticeService.findNoticeByUid(user.getId(), Integer.parseInt(pagNum));
+                List<Notice> list = pageInfo.getList();
+                model.addAttribute("notifications",list);
+                model.addAttribute("pageInf",pageInfo);
+            }
         }
 
         return "profile";

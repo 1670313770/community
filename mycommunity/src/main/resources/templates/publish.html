@@ -3,7 +3,7 @@
 <head>
     <title>发布 - GiaoGiao社区</title>
     <head th:insert="~{import :: head}"></head>
-<!--    <head th:insert="~{import :: markdown}"></head>-->
+    <head th:insert="~{import :: markdown}"></head>
 </head>
 <body>
 <div th:insert="~{navigation :: nav}"></div>
@@ -23,12 +23,10 @@
                 </div>
                 <div class="form-group" id="question-editor">
                     <label for="description">问题补充 (必填，请参照右侧提示):</label>
-                    <!--style="display:none;"-->
-                    <textarea name="description" id="description" th:text="${description}"
+                    <textarea name="description" id="description" th:text="${description}" style="display:none;"
                               class="form-control"
                               cols="30"
-                              rows="10">
-                    </textarea>
+                              rows="10"></textarea>
                 </div>
                 <script type="text/javascript">
                     $(function () {
@@ -102,6 +100,6 @@
         </div>
     </div>
 </div>
-<!--<div th:insert="~{footer :: foot}"></div>-->
+<div th:insert="~{footer :: foot}"></div>
 </body>
 </html>

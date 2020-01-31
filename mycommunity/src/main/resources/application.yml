@@ -13,3 +13,9 @@ pagehelper:
   reasonable: true
   supportMethodsArguments: true
   params: count=countSql
+logging:
+  file: logs/community.log
+  file.max-history: 15
+  file.max-size: 100MB
+  level:
+    root: info

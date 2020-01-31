@@ -2,20 +2,20 @@ package com.ck.mycommunity.controller;
 
 import com.ck.mycommunity.domain.Comment;
 import com.ck.mycommunity.domain.User;
+import com.ck.mycommunity.enums.CommentTypeEnum;
 import com.ck.mycommunity.exception.CustomizeErrorCode;
 import com.ck.mycommunity.exception.CustomizeException;
 import com.ck.mycommunity.pojo.CommentPojo;
+import com.ck.mycommunity.pojo.ResultPojo;
 import com.ck.mycommunity.service.CommentService;
-import org.omg.CORBA.PRIVATE_MEMBER;
+import com.ck.mycommunity.service.QuestionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -27,6 +27,8 @@ public class CommentController {
 
     @Autowired
     private CommentService commentService;
+    @Autowired
+    private QuestionService questionService;
 
     @ResponseBody
     @RequestMapping(value = "/comment",method = RequestMethod.POST)
@@ -45,9 +47,13 @@ public class CommentController {
         comment.setLikeCount(0L);
         commentService.addComment(comment);
 
-        Map<String,Object> map=new HashMap<>();
-        map.put("message","成功");
-        return map;
+        return ResultPojo.okOf();
     }
 
+    @ResponseBody
+    @RequestMapping(value = "/comment/{id}",method = RequestMethod.GET)
+    public ResultPojo<List<CommentPojo>> SecComments(@PathVariable(name = "id")Long id){
+        List<CommentPojo> commentPojoById = questionService.findCommentPojoById(id, CommentTypeEnum.COMMENT);
+        return ResultPojo.okOf(commentPojoById);
+    }
 }
